@@ -118,3 +118,20 @@ save_data_to_csv(medium_dam_data, "medium")
 driver.quit()
 end_time = time.time()  # 👉 หลัง quit()
 print(f"⏱️ ใช้เวลาในการรันทั้งหมด: {end_time - start_time:.2f} วินาที")
+
+
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+
+def upload_to_drive(filepath, filename, folder_id):
+    creds = service_account.Credentials.from_service_account_file("service_account.json")
+    service = build("drive", "v3", credentials=creds)
+    file_metadata = {"name": filename, "parents": [folder_id]}
+    media = MediaFileUpload(filepath, resumable=True)
+    file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+    print(f"✅ อัปโหลดไฟล์: {filename} ไปยัง Google Drive สำเร็จ (ID: {file.get('id')})")
+
+
+if __name__ == '__main__':
+    upload_to_drive('scrap3.csv', 'scrap3.csv', '1K...')

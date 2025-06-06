@@ -90,3 +90,21 @@ if file_exists:
 else:
     df.to_csv(file_path, index=False, encoding="utf-8-sig")
     print("สร้างไฟล์ใหม่และบันทึกข้อมูลสำเร็จ")
+
+
+
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+
+def upload_to_drive(filepath, filename, folder_id):
+    creds = service_account.Credentials.from_service_account_file("service_account.json")
+    service = build("drive", "v3", credentials=creds)
+    file_metadata = {"name": filename, "parents": [folder_id]}
+    media = MediaFileUpload(filepath, resumable=True)
+    file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+    print(f"✅ อัปโหลดไฟล์: {filename} ไปยัง Google Drive สำเร็จ (ID: {file.get('id')})")
+
+
+if __name__ == '__main__':
+    upload_to_drive('scrap1.csv', 'scrap1.csv', '1K...')
